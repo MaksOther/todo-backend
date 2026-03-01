@@ -13,6 +13,7 @@ export const User = client.define('user', {
     }, 
     activateToken: {
         type: DataTypes.STRING,
+        allowNull: true,
     }
 
 })

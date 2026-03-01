@@ -1,6 +1,4 @@
 import { User } from "../models/User.js";
-import { emailService } from "../services/email.services.js";
-import { v4 as uuidv4 } from "uuid";
 import { jwtService } from "../services/jwt.sevrices.js";
 import { catchError } from "../utils/catchError.js";
 import { ApiError } from "../exeptions/api.error.js";
@@ -19,7 +17,6 @@ const validatePassword = (value) => {
 
 const registration = catchError(async (req, res) => {
   const { email, password } = req.body;
-  const activateToken = uuidv4();
 
   const errors = {
     email: validateEmail(email),
@@ -32,34 +29,19 @@ const registration = catchError(async (req, res) => {
 
   const existingUser = await User.findOne({ where: { email } });
   if (existingUser) {
-    throw ApiError.badRequest("Email error", { email: "Email is already taken" });
+    throw ApiError.badRequest("Email error", {
+      email: "Email is already taken",
+    });
   }
 
   const hashedPass = await bcrypt.hash(password, 10);
 
-  const newUser = await User.create({ 
-    email, 
-    password: hashedPass, 
-    activateToken 
-  });
-  
-  await emailService.sendActivationEmail(email, activateToken);
+  const newUser = await User.create({ email, password: hashedPass });
 
-  res.send(newUser);
-});
+  const userData = { id: newUser.id, email: newUser.email };
+  const accessToken = jwtService.sign(userData);
 
-const activate = catchError(async (req, res) => {
-  const { activateToken } = req.params;
-  const user = await User.findOne({ where: { activateToken } });
-
-  if (!user) {
-    throw ApiError.notFound();
-  }
-
-  user.activateToken = null;
-  await user.save();
-
-  res.send(user);
+  res.send({ user: userData, accessToken });
 });
 
 const login = catchError(async (req, res) => {
@@ -77,7 +59,7 @@ const login = catchError(async (req, res) => {
   const user = await User.findOne({ where: { email } });
 
   if (!user) {
-    throw ApiError.badRequest("No such user"); 
+    throw ApiError.badRequest("No such user");
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -86,22 +68,13 @@ const login = catchError(async (req, res) => {
     throw ApiError.badRequest("Wrong password");
   }
 
-  const userData = {
-    id: user.id,
-    email: user.email,
-  };
-
+  const userData = { id: user.id, email: user.email };
   const accessToken = jwtService.sign(userData);
 
-  res.send({
-    user: userData,
-    accessToken,
-  });
+  res.send({ user: userData, accessToken });
 });
-
 
 export const AuthController = {
   registration,
-  activate,
   login,
 };
