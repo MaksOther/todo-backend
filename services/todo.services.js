@@ -1,24 +1,24 @@
-// services/todo.services.js
 import { Todo } from "../models/Todo.js";
 import { User } from "../models/User.js";
 import { client } from "../utils/db.js";
 
-export const getAll = async () => {
+export const getAll = async (userId) => {
   return await Todo.findAll({
+    where: { userId },
     order: ["title"],
   });
 };
 
-export const getById = async (id) => {
-  return Todo.findByPk(id);
+export const getById = async (id, userId) => {
+  return Todo.findOne({ where: { id, userId } });
 };
 
-export const create = (title) => {
-  return Todo.create({ title });
+export const create = (title, userId) => {
+  return Todo.create({ title, userId });
 };
 
-export const update = async (id, data, transaction = null) => {
-  const currentTodo = await getById(id);
+export const update = async (id, data, userId, transaction = null) => {
+  const currentTodo = await getById(id, userId);
   if (!currentTodo) return null;
 
   const isCompleted =
@@ -34,18 +34,18 @@ export const update = async (id, data, transaction = null) => {
   return currentTodo;
 };
 
-export const updateMany = async (items) => {
+export const updateMany = async (items, userId) => {
   await client.transaction(async (t) => {
-    await Promise.all(items.map((item) => update(item.id, item, t)));
+    await Promise.all(items.map((item) => update(item.id, item, userId, t)));
   });
 
-  return getAll();
+  return getAll(userId);
 };
 
 export function findByEmail(email) {
-  return User.findOne({ where : { email }});
+  return User.findOne({ where: { email } });
 }
 
-export const remove = async (id) => {
-  return await Todo.destroy({ where: { id } });
+export const remove = async (id, userId) => {
+  return await Todo.destroy({ where: { id, userId } });
 };

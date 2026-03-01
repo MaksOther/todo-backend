@@ -18,10 +18,14 @@ export const Todo = client.define(
       allowNull: false,
       defaultValue: false,
     },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   },
   {
     tableName: "todos",
     updatedAt: false,
     createdAt: false,
-  }
+  },
 );

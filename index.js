@@ -12,14 +12,15 @@ const app = express();
 const PORT = process.env.PORT || 3005;
 
 app.use(cors());
+app.options("*", cors());
 app.use(express.json());
 app.use("/todos", todoRouter);
 app.use("/", authRouter);
 app.use(errorMiddleware);
 
 client
-  .sync()
-  .then(async() => {
+  .sync({ alter: true })
+  .then(async () => {
     console.log("✅ Database connected and synced");
     app.listen(PORT, () => {
       console.log(`🚀 Server is running on port ${PORT}`);
