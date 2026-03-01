@@ -1,16 +1,10 @@
 import express from "express";
 import * as todoController from "../controllers/todo.controller.js";
 import { authMiddlewares } from "../middlewares/authMiddlewares.js";
-import cors from "cors";
 
 const router = express.Router();
 
-router.use(cors());
-
-router.use((req, res, next) => {
-  if (req.method === 'OPTIONS') return next();
-  authMiddlewares(req, res, next);
-});
+router.use(authMiddlewares);
 
 router.get("/", todoController.get);
 router.post("/", todoController.post);

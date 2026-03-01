@@ -11,7 +11,12 @@ import { errorMiddleware } from "./middlewares/errorMiddlewares.js";
 const app = express();
 const PORT = process.env.PORT || 3005;
 
-app.use(cors());
+app.use(cors({
+  origin: "https://maksother.github.io",
+  methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
 app.use(express.json());
 app.use("/todos", todoRouter);
 app.use("/", authRouter);
