@@ -99,17 +99,6 @@ const login = catchError(async (req, res) => {
   });
 });
 
-const refresh = (req, res) => {
-    const {refreshToken } = refresh.cookies;
-
-    const user = jwtService.verifyRefresh(refreshToken);
-
-    if (!user) {
-        throw ApiError.unauthorized()
-    }
-
-    
-}
 
 export const AuthController = {
   registration,

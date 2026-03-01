@@ -7,7 +7,6 @@ import { client } from "./utils/db.js";
 import "./models/Todo.js";
 import { User } from "./models/User.js";
 import { errorMiddleware } from "./middlewares/errorMiddlewares.js";
-import cookieParser from "cookie-parser";
 
 const app = express();
 const PORT = process.env.PORT || 3005;
@@ -16,9 +15,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/todos", todoRouter);
 app.use("/", authRouter);
-
 app.use(errorMiddleware);
-app.use(cookieParser());
 
 client
   .sync()
