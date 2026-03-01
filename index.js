@@ -20,7 +20,6 @@ app.use(errorMiddleware);
 client
   .sync()
   .then(async() => {
-    await User.sync({ force: true });
     console.log("✅ Database connected and synced");
     app.listen(PORT, () => {
       console.log(`🚀 Server is running on port ${PORT}`);
