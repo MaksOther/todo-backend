@@ -1,40 +1,7 @@
-import { DataTypes, Sequelize } from "sequelize";
-
-const dbUrl = process.env.DATABASE_URL || "postgres://postgres:123123@localhost:5432/postgres";
-const sequelize = new Sequelize(dbUrl, {
-  dialect: "postgres",
-  dialectOptions: {
-    ssl: process.env.NODE_ENV === "production" ? {
-      require: true,
-      rejectUnauthorized: false,
-    } : false,
-  },
-});
-
-const Todo = sequelize.define(
-  "Todo",
-  {
-    id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      primaryKey: true,
-    },
-    title: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    completed: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
-  },
-  {
-    tableName: "todos",
-    updatedAt: false,
-    createdAt: false,
-  },
-);
+// services/todo.services.js
+import { Todo } from "../models/Todo.js";
+import { User } from "../models/User.js";
+import { client } from "../utils/db.js";
 
 export const getAll = async () => {
   return await Todo.findAll({
@@ -68,15 +35,17 @@ export const update = async (id, data, transaction = null) => {
 };
 
 export const updateMany = async (items) => {
-  await sequelize.transaction(async (t) => {
+  await client.transaction(async (t) => {
     await Promise.all(items.map((item) => update(item.id, item, t)));
   });
 
   return getAll();
 };
 
+export function findByEmail(email) {
+  return User.findOne({ where : { email }});
+}
+
 export const remove = async (id) => {
   return await Todo.destroy({ where: { id } });
 };
-
-export { sequelize };
